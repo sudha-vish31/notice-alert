@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOTICE ALERT - Dashboard</title>
+    <!-- Font Awesome Icons & SheetJS for Excel Export -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --bg-gray: #f4f6f9;
+            --border-color: #dee2e6;
+            --text-dark: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            font-size: 13px;
+        }
+
+        header {
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1d3557;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logo span {
+            color: #e63946;
+            font-size: 10px;
+            display: block;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 13px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn.active {
+            background-color: #e9ecef;
+            border: 1px solid var(--border-color);
+            font-weight: bold;
+            color: #000;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #fff;
+        }
+
+        .container {
+            padding: 15px 20px;
+        }
+
+        .page-view {
+            display: none;
+        }
+
+        .page-view.active {
+            display: block;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--primary-blue);
+        }
+
+        .card-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a252f;
+        }
+
+        .card-label {
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .card-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #fff;
+            margin-left: 5px;
+        }
+
+        .bg-blue { background-color: #0d6efd; }
+
+        .dashboard-grid {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .dashboard-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .calendar-col {
+            width: 300px;
+            flex-shrink: 0;
+        }
+
+        .calendar-section {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn:hover { background-color: #f8f9fa; }
+        .btn-primary { background-color: #0d6efd; color: #fff; border: none; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .table-container {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        tr:hover { background-color: #f1f3f5; }
+
+        .filter-grid {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-item label {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        select, input {
+            padding: 5px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .breadcrumb {
+            font-size: 11px;
+            color: #0d6efd;
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb span {
+            color: #6c757d;
+        }
+
+        .badge-tab {
+            background-color: #0d6efd;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0;
+            text-align: center;
+            border-top: 1px solid #eef0f2;
+            border-left: 1px solid #eef0f2;
+        }
+
+        .calendar-day-head {
+            font-size: 9px;
+            color: #6c757d;
+            padding: 2px 0;
+            border-right: 1px solid #eef0f2;
+            border-bottom: 1px solid #eef0f2;
+        }
+
+        .calendar-day {
+            padding: 2px;
+            font-size: 9px;
+            line-height: 1.4;
+            border-right: 1px solid #eef0f2;
+            border-bottom: 1px solid #eef0f2;
+        }
+
+        .calendar-day.has-issue { box-shadow: inset 0 0 0 1px #0d6efd; }
+        .calendar-day.has-due { box-shadow: inset 0 0 0 1px #dc3545; }
+        .calendar-day.other-month { color: #ced4da; }
+        .calendar-day.clickable { cursor: pointer; }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 6px;
+            font-size: 8px;
+            color: #6c757d;
+        }
+
+        .calendar-legend span {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .legend-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .legend-issue { background: #0d6efd; }
+        .legend-due { background: #dc3545; }
+        .legend-both { background: #fd7e14; }
+
+        .card-icon-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .badge-grey { background: #eef0f2; color: #6c757d; }
+        .badge-blue { background: #e7f1ff; color: #0d6efd; }
+        .badge-orange { background: #fff1e0; color: #fd7e14; }
+        .badge-red { background: #fdeaea; color: #dc3545; }
+
+        .card-badge.badge-open { background-color: #12b886; }
+        .card-badge.badge-due { background-color: #fd7e14; }
+        .card-badge.badge-overdue { background-color: #dc3545; }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .icon-red { color: #dc3545; }
+        .icon-blue { color: #0d6efd; }
+
+        /* --- Add Assessee modal --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 6px;
+            padding: 20px;
+            width: 420px;
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-box h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .form-row label {
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .form-row input, .form-row select {
+            padding: 7px 8px;
+            font-size: 13px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .form-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: -6px;
+            margin-bottom: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+        <div style="background:#fff; border:1px solid var(--border-color); border-radius:6px; padding:30px; width:340px;">
+            <div class="logo" style="margin-bottom:20px;">NOTICE <span>ALERT</span></div>
+            <div class="form-row">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="you@firm.com">
+            </div>
+            <div class="form-row">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="••••••••">
+            </div>
+            <div class="form-error" id="login-error"></div>
+            <button class="btn btn-primary" id="login-btn" style="width:100%; padding:9px;" onclick="submitLogin()">Log In</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP (hidden until logged in) -->
+    <div id="app-shell" style="display:none;">
+
+    <header>
+        <div class="logo">
+            NOTICE <span>ALERT</span>
+        </div>
+        <nav>
+            <button class="nav-btn" id="nav-product" onclick="switchTab('product')"><i class="fa-solid fa-cubes"></i> Product</button>
+            <button class="nav-btn active" id="nav-dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-gauge"></i> Dashboard</button>
+            <button class="nav-btn" id="nav-e-proceeding" onclick="switchTab('e-proceeding')"><i class="fa-regular fa-file-lines"></i> e-Proceeding</button>
+            <button class="nav-btn" id="nav-outstanding" onclick="switchTab('outstanding')"><i class="fa-solid fa-receipt"></i> Outstanding Demand</button>
+            <button class="nav-btn" id="nav-report" onclick="switchTab('report')"><i class="fa-solid fa-chart-line"></i> Report <i class="fa-solid fa-caret-down" style="font-size:10px;"></i></button>
+            <button class="nav-btn" id="nav-all-users" onclick="switchTab('all-users')"><i class="fa-solid fa-users"></i> All Users <i class="fa-solid fa-caret-down" style="font-size:10px;"></i></button>
+        </nav>
+        <div class="user-profile" style="position:relative;">
+            <div style="display:flex; align-items:center; gap:8px; cursor:pointer;" onclick="toggleUserMenu()">
+                <span id="current-user-name">—</span>
+                <div class="user-avatar" id="current-user-avatar">?</div>
+            </div>
+            <div id="user-menu" style="display:none; position:absolute; top:36px; right:0; background:#fff; border:1px solid var(--border-color); border-radius:6px; box-shadow:0 4px 10px rgba(0,0,0,0.1); min-width:140px; z-index:50;">
+                <div class="user-menu-item" id="add-user-menu-item" style="display:none; padding:8px 14px; cursor:pointer;" onclick="closeUserMenu(); openAddUserModal();">Add User</div>
+                <div class="user-menu-item" style="padding:8px 14px; cursor:pointer;" onclick="closeUserMenu(); logout();">Logout</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard-view" class="page-view active">
+
+            <div class="dashboard-grid">
+                <div class="dashboard-left">
+
+                    <div style="text-align: right; margin-bottom: 8px;"><a href="#" style="font-size: 10px; color: #0d6efd; border: 1px solid #0d6efd; border-radius: 12px; padding: 2px 10px; text-decoration: none; display: inline-block;">Company</a></div>
+
+                    <!-- Metric Cards Row 1 -->
+                    <div class="metrics-grid">
+                        <div class="card" id="card-all" onclick="openEProceedingWithFilter('all')">
+                            <div>
+                                <div class="card-value">0</div>
+                                <div class="card-label">Total Notices</div>
+                            </div>
+                            <div class="card-icon-badge badge-grey"><i class="fa-solid fa-bullhorn"></i></div>
+                        </div>
+                        <div class="card" id="card-15days" onclick="openEProceedingWithFilter('15days')">
+                            <div>
+                                <div class="card-value">0</div>
+                                <div class="card-label">Last 15 Days</div>
+                            </div>
+                            <div class="card-icon-badge badge-blue"><i class="fa-regular fa-calendar-days"></i></div>
+                        </div>
+                        <div class="card" id="card-24hours" onclick="openEProceedingWithFilter('24hours')">
+                            <div>
+                                <div class="card-value">0</div>
+                                <div class="card-label">Last 24 Hours</div>
+                            </div>
+                            <div class="card-icon-badge badge-orange"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        </div>
+                        <div class="card" id="card-pantan" onclick="switchTab('pan-list')">
+                            <div>
+                                <div class="card-value">0</div>
+                                <div class="card-label">Total PAN/TAN</div>
+                            </div>
+                            <div class="card-icon-badge badge-blue"><i class="fa-solid fa-id-card"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Metric Cards Row 2 -->
+                    <div class="metrics-grid">
+                        <div class="card" id="card-open" onclick="openEProceedingWithFilter('open')">
+                            <div>
+                                <div class="card-value">0 <span class="card-badge badge-open">OPEN</span></div>
+                                <div class="card-label">Open Notices</div>
+                            </div>
+                        </div>
+                        <div class="card" id="card-7days" onclick="openEProceedingWithFilter('7days')">
+                            <div>
+                                <div class="card-value">0 <span class="card-badge badge-due">DUE</span></div>
+                                <div class="card-label">7 Days Due</div>
+                            </div>
+                        </div>
+                        <div class="card" id="card-overdue" onclick="openEProceedingWithFilter('overdue')">
+                            <div>
+                                <div class="card-value">0 <span class="card-badge badge-overdue">OVER DUE</span></div>
+                                <div class="card-label">Over Due</div>
+                            </div>
+                        </div>
+                        <div class="card" id="card-failed" onclick="openEProceedingWithFilter('failed')">
+                            <div>
+                                <div class="card-value">0</div>
+                                <div class="card-label">Failed Logins</div>
+                            </div>
+                            <div class="card-icon-badge badge-red"><i class="fa-solid fa-arrows-rotate"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar column: "Company" sits above the box, not inside it -->
+                <div class="calendar-col">
+                    <div class="calendar-section">
+                    <div class="calendar-header">
+                        <span id="calendar-month-label">July 2026</span>
+                        <div><button class="btn" onclick="prevMonth()">&lt;</button> <button class="btn" onclick="nextMonth()">&gt;</button></div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <div class="calendar-day-head">Sun</div>
+                        <div class="calendar-day-head">Mon</div>
+                        <div class="calendar-day-head">Tue</div>
+                        <div class="calendar-day-head">Wed</div>
+                        <div class="calendar-day-head">Thu</div>
+                        <div class="calendar-day-head">Fri</div>
+                        <div class="calendar-day-head">Sat</div>
+                    </div>
+                    <div class="calendar-legend">
+                        <span><i class="legend-dot legend-issue"></i>Issue date</span>
+                        <span><i class="legend-dot legend-due"></i>Due date</span>
+                        <span><i class="legend-dot legend-both"></i>Both</span>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar + table span the FULL page width, below the stat-cards/calendar row -->
+            <div class="toolbar">
+                <div class="btn-group">
+                    <button class="btn" onclick="openAddAssesseeModal()">Add Assessee</button>
+                    <button class="btn" onclick="triggerImportFile()">Import</button>
+                    <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleImportFile(event)">
+                    <button class="btn" onclick="downloadAssesseeTemplate()">Download Template</button>
+                </div>
+                <button class="btn" id="sync-all-btn" onclick="syncAll()">Sync All</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>PAN/TAN</th>
+                            <th>Name of Assessee</th>
+                            <th>User Name</th>
+                            <th>Incorporate Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assesseeTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- E-PROCEEDING VIEW -->
+        <div id="e-proceeding-view" class="page-view">
+            <div class="breadcrumb">ITR Dashboard <span>&gt; EProceeding Data</span></div>
+            <div class="badge-tab" id="e-proceeding-count-badge">E-Proceeding (0)</div>
+            
+            <h2 style="margin-bottom: 15px; font-weight: normal;">Income Tax Notice</h2>
+
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label>Assessment Year</label>
+                    <select id="ayFilter" onchange="applyFilters()">
+                        <option value="All">All</option>
+                        <option value="2024-25">2024 - 25</option>
+                        <option value="2025-26">2025 - 26</option>
+                        <option value="2017-18">2017 - 18</option>
+                        <option value="2023-24">2023 - 24</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Type Of Proceeding</label>
+                    <select id="typeFilter" onchange="applyFilters()">
+                        <option value="All">All</option>
+                        <option value="Issue Letter">Issue Letter</option>
+                        <option value="Penalty Proceeding">Penalty Proceeding</option>
+                        <option value="First Appeal Proceedings">First Appeal Proceedings</option>
+                        <option value="Assessment Proceeding">Assessment Proceeding</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Status</label>
+                    <select id="statusFilter" onchange="applyFilters()">
+                        <option value="All">All</option>
+                        <option value="Open">Open</option>
+                        <option value="In_Progress">In Progress</option>
+                        <option value="Replied">Replied</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Priority Status</label>
+                    <select id="priorityFilter" onchange="applyFilters()">
+                        <option value="All">All</option>
+                        <option value="Normal">Normal</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Filter</label>
+                    <select id="dateFilter" onchange="applyFilters()">
+                        <option value="All">All</option>
+                        <option value="Last 15 Days">Last 15 Days</option>
+                    </select>
+                </div>
+                <button class="btn" style="align-self: flex-end;" onclick="clearFilters()">Clear</button>
+            </div>
+
+            <div class="toolbar">
+                <div class="btn-group">
+                    <button class="btn" onclick="openBulkUpdateModal('status')">Update Status</button>
+                    <button class="btn" onclick="openBulkUpdateModal('priority')">Priority</button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="searchInput" placeholder="Search..." onkeyup="applyFilters()">
+                    <button class="btn btn-primary" onclick="exportToExcel()"><i class="fa-regular fa-file-excel"></i> Export to Excel</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="proceedingsTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" onclick="toggleSelectAll(this)"></th>
+                            <th>PAN/TAN</th>
+                            <th>Name of Assessee</th>
+                            <th>Notice Reference ID</th>
+                            <th>Proceeding Name</th>
+                            <th>A.Y.</th>
+                            <th>F.Y.</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eProceedingTableBody">
+                        <!-- Populated dynamically via API -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- OTHER TAB PLACEHOLDERS -->
+        <div id="product-view" class="page-view">
+            <div class="breadcrumb">ITR Dashboard <span>&gt; Product</span></div>
+            <h2 style="margin-bottom: 15px; font-weight: normal;">Email Ingestion </h2>
+
+            <div class="filter-grid" style="align-items: flex-end;">
+                <div class="filter-item" style="min-width:160px;">
+                    <label>IMAP Host</label>
+                    <input type="text" id="email-host" placeholder="imap.gmail.com">
+                </div>
+                <div class="filter-item" style="min-width:80px;">
+                    <label>Port</label>
+                    <input type="number" id="email-port" placeholder="993" value="993">
+                </div>
+                <div class="filter-item" style="min-width:200px;">
+                    <label>Email Address</label>
+                    <input type="email" id="email-address" placeholder="firm@gmail.com">
+                </div>
+                <div class="filter-item" style="min-width:180px;">
+                    <label>App Password</label>
+                    <input type="password" id="email-app-password" placeholder="16-char app password">
+                </div>
+                <button class="btn btn-primary" onclick="connectEmailAccount()">Connect Mailbox</button>
+            </div>
+            <p style="font-size:11px; color:#6c757d; margin:-10px 0 15px;">
+                Gmail: enable 2-Step Verification, then generate an App Password at myaccount.google.com/apppasswords — your normal password will not work here.
+            </p>
+
+            <div class="table-container" style="margin-bottom:25px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Email Address</th>
+                            <th>Host</th>
+                            <th>Status</th>
+                            <th>Last Synced UID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emailAccountsTableBody">
+                        <tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">No mailbox connected yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 style="margin-bottom: 15px; font-weight: normal;">Unmatched Notices — Manual Review </h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Received</th>
+                            <th>Sender</th>
+                            <th>Subject</th>
+                            <th>Extracted PAN</th>
+                            <th>Assign To Assessee</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="unmatchedTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">Nothing pending review.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="pan-list-view" class="page-view">
+            <div class="breadcrumb">ITR Dashboard <span>&gt; PAN/TAN List</span></div>
+            <h2 style="margin-bottom: 15px; font-weight: normal;">Assessee Details (PAN/TAN List)</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>PAN/TAN</th>
+                            <th>Name of Assessee</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="panListTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="outstanding-view" class="page-view">
+            <div class="breadcrumb">ITR Dashboard <span>&gt; Outstanding Demand</span></div>
+            <div class="badge-tab" id="outstanding-count-badge">Outstanding Demand (0)</div>
+
+            <h2 style="margin-bottom: 15px; font-weight: normal;">Outstanding Demand</h2>
+
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label>Assessment Year</label>
+                    <select id="odAyFilter" onchange="applyOutstandingFilters()">
+                        <option value="All">All</option>
+                        <option value="2024-25">2024 - 25</option>
+                        <option value="2025-26">2025 - 26</option>
+                        <option value="2017-18">2017 - 18</option>
+                        <option value="2023-24">2023 - 24</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Status</label>
+                    <select id="odStatusFilter" onchange="applyOutstandingFilters()">
+                        <option value="All">All</option>
+                        <option value="Open">Open</option>
+                        <option value="In_Progress">In Progress</option>
+                        <option value="Replied">Replied</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+                <button class="btn" style="align-self: flex-end;" onclick="clearOutstandingFilters()">Clear</button>
+            </div>
+
+            <div class="toolbar">
+                <div class="btn-group">
+                    <button class="btn" onclick="openBulkUpdateModal('status', 'outstanding')">Update Status</button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="odSearchInput" placeholder="Search..." onkeyup="applyOutstandingFilters()">
+                    <button class="btn btn-primary" onclick="exportOutstandingToExcel()"><i class="fa-regular fa-file-excel"></i> Export to Excel</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" onclick="toggleSelectAllIn('outstandingTableBody', this)"></th>
+                            <th>PAN/TAN</th>
+                            <th>Name of Assessee</th>
+                            <th>Notice Reference ID</th>
+                            <th>Section</th>
+                            <th>A.Y.</th>
+                            <th>F.Y.</th>
+                            <th>Demand Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outstandingTableBody">
+                        <!-- Populated dynamically via API -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ALL USERS VIEW (FR-9.2) — staff accounts + their assigned assessees -->
+        <div id="all-users-view" class="page-view">
+            <div class="breadcrumb">ITR Dashboard <span>&gt; All Users</span></div>
+            <h2 style="margin-bottom: 15px; font-weight: normal;">Staff &amp; Assigned Assessees</h2>
+
+            <div class="toolbar">
+                <div class="btn-group"></div>
+                <button class="btn btn-primary" onclick="openAddUserModal()">+ Add User</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Assigned Assessees</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allUsersTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- REPORT VIEW (FR-9.1) — filterable by status, date range, notice type, assessee -->
+        <div id="report-view" class="page-view">
+            <div class="breadcrumb">ITR Dashboard <span>&gt; Reports</span></div>
+            <h2 style="margin-bottom: 15px; font-weight: normal;">Reports</h2>
+
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label>Assessee</label>
+                    <select id="reportAssesseeFilter" onchange="applyReportFilters()">
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Notice Type</label>
+                    <select id="reportTypeFilter" onchange="applyReportFilters()">
+                        <option value="All">All</option>
+                        <option value="Issue Letter">Issue Letter</option>
+                        <option value="Penalty Proceeding">Penalty Proceeding</option>
+                        <option value="First Appeal Proceedings">First Appeal Proceedings</option>
+                        <option value="Assessment Proceeding">Assessment Proceeding</option>
+                        <option value="Demand Notice">Demand Notice</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Status</label>
+                    <select id="reportStatusFilter" onchange="applyReportFilters()">
+                        <option value="All">All</option>
+                        <option value="Open">Open</option>
+                        <option value="In_Progress">In Progress</option>
+                        <option value="Replied">Replied</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Issue Date From</label>
+                    <input type="date" id="reportDateFrom" onchange="applyReportFilters()">
+                </div>
+                <div class="filter-item">
+                    <label>Issue Date To</label>
+                    <input type="date" id="reportDateTo" onchange="applyReportFilters()">
+                </div>
+                <button class="btn" style="align-self: flex-end;" onclick="clearReportFilters()">Clear</button>
+            </div>
+
+            <div class="toolbar">
+                <div class="btn-group"></div>
+                <button class="btn btn-primary" onclick="exportReportToExcel()"><i class="fa-regular fa-file-excel"></i> Export to Excel</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PAN/TAN</th>
+                            <th>Name of Assessee</th>
+                            <th>Category</th>
+                            <th>Notice Type</th>
+                            <th>A.Y.</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Demand Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr><td colspan="9" style="text-align:center; padding:20px; color:#888;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    </div><!-- /#app-shell -->
+
+    <!-- Add Assessee Modal -->
+    <div class="modal-overlay" id="addAssesseeModal">
+        <div class="modal-box">
+            <h3>Add Assessee</h3>
+            <div class="form-row">
+                <label>PAN / TAN *</label>
+                <input type="text" id="modal-pan-tan" maxlength="10" placeholder="e.g. FBNPS7363R">
+            </div>
+            <div class="form-row">
+                <label>Legal Name *</label>
+                <input type="text" id="modal-legal-name" placeholder="e.g. AJITBHAI JIVRAJBHAI SHAH">
+            </div>
+            <div class="form-row">
+                <label>Incorporation / DOB Date</label>
+                <input type="date" id="modal-incorporation-date">
+            </div>
+            <div class="form-row">
+                <label>Portal</label>
+                <select id="modal-portal">
+                    <option value="">-- None --</option>
+                    <option value="IncomeTax">Income Tax</option>
+                    <option value="GST">GST</option>
+                    <option value="TRACES">TRACES</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Portal Username</label>
+                <input type="text" id="modal-username">
+            </div>
+            <div class="form-row">
+                <label>Portal Password</label>
+                <input type="password" id="modal-password">
+            </div>
+            <div class="form-error" id="modal-error"></div>
+            <div class="form-actions">
+                <button class="btn" onclick="closeAddAssesseeModal()">Cancel</button>
+                <button class="btn btn-primary" id="modal-submit-btn" onclick="submitAddAssessee()">Save Assessee</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Assessee Modal (FR-2.3) -->
+    <div class="modal-overlay" id="editAssesseeModal">
+        <div class="modal-box">
+            <h3>Edit Assessee</h3>
+            <div class="form-row">
+                <label>PAN / TAN</label>
+                <input type="text" id="edit-modal-pan-tan" disabled>
+            </div>
+            <div class="form-row">
+                <label>Legal Name *</label>
+                <input type="text" id="edit-modal-legal-name">
+            </div>
+            <div class="form-row">
+                <label>Incorporation / DOB Date</label>
+                <input type="date" id="edit-modal-incorporation-date">
+            </div>
+            <div class="form-row">
+                <label>Active</label>
+                <select id="edit-modal-active">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Portal</label>
+                <select id="edit-modal-portal">
+                    <option value="">-- None --</option>
+                    <option value="IncomeTax">Income Tax</option>
+                    <option value="GST">GST</option>
+                    <option value="TRACES">TRACES</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Portal Username</label>
+                <input type="text" id="edit-modal-username">
+            </div>
+            <div class="form-row">
+                <label>New Portal Password <span style="color:#6c757d; font-weight:normal;">(leave blank to keep unchanged)</span></label>
+                <input type="password" id="edit-modal-password">
+            </div>
+            <div class="form-error" id="edit-modal-error"></div>
+            <div class="form-actions">
+                <button class="btn" onclick="closeEditAssesseeModal()">Cancel</button>
+                <button class="btn btn-primary" id="edit-modal-submit-btn" onclick="submitEditAssessee()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal (Admin only, FR-1.2) -->
+    <div class="modal-overlay" id="addUserModal">
+        <div class="modal-box">
+            <h3>Add Staff User</h3>
+            <div class="form-row">
+                <label>Full Name *</label>
+                <input type="text" id="user-modal-name">
+            </div>
+            <div class="form-row">
+                <label>Email *</label>
+                <input type="email" id="user-modal-email">
+            </div>
+            <div class="form-row">
+                <label>Temporary Password *</label>
+                <input type="password" id="user-modal-password">
+            </div>
+            <div class="form-row">
+                <label>Role</label>
+                <select id="user-modal-role">
+                    <option value="Staff">Staff</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-error" id="user-modal-error"></div>
+            <div class="form-actions">
+                <button class="btn" onclick="closeAddUserModal()">Cancel</button>
+                <button class="btn btn-primary" id="user-modal-submit-btn" onclick="submitAddUser()">Create User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Assessees Modal (All Users page, FR-9.2) -->
+    <div class="modal-overlay" id="assignModal">
+        <div class="modal-box">
+            <h3>Assign Assessees</h3>
+            <p id="assign-modal-user-label" style="font-size:12px; color:#6c757d; margin-bottom:10px;"></p>
+            <div class="form-row">
+                <label>Select assessees to assign to this user</label>
+                <div id="assign-modal-checklist" style="max-height:220px; overflow-y:auto; border:1px solid var(--border-color); border-radius:4px; padding:8px;"></div>
+            </div>
+            <div class="form-error" id="assign-modal-error"></div>
+            <div class="form-actions">
+                <button class="btn" onclick="closeAssignModal()">Cancel</button>
+                <button class="btn btn-primary" id="assign-modal-submit-btn" onclick="submitAssign()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Update Status/Priority Modal (e-Proceeding) -->
+    <div class="modal-overlay" id="bulkUpdateModal">
+        <div class="modal-box">
+            <h3 id="bulk-modal-title">Update Status</h3>
+            <p id="bulk-modal-count" style="font-size:12px; color:#6c757d; margin-bottom:10px;"></p>
+            <div class="form-row">
+                <label id="bulk-modal-label">New Status</label>
+                <select id="bulk-modal-value"></select>
+            </div>
+            <div class="form-error" id="bulk-modal-error"></div>
+            <div class="form-actions">
+                <button class="btn" onclick="closeBulkUpdateModal()">Cancel</button>
+                <button class="btn btn-primary" id="bulk-modal-submit-btn" onclick="submitBulkUpdate()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Action performed</div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        let allNotices = [];
+        let allDemandNotices = [];
+        let allAssessees = [];
+        let allStaffUsers = [];
+        let calendarViewDate = new Date(); // month currently shown
+        let currentUser = null;
+
+        // --- Auth ---
+        function getToken() {
+            return localStorage.getItem('notice_alert_token');
+        }
+
+        function setSession(token, user) {
+            localStorage.setItem('notice_alert_token', token);
+            localStorage.setItem('notice_alert_user', JSON.stringify(user));
+            currentUser = user;
+        }
+
+        function clearSession() {
+            localStorage.removeItem('notice_alert_token');
+            localStorage.removeItem('notice_alert_user');
+            currentUser = null;
+        }
+
+        function showLoginScreen() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-shell').style.display = 'none';
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-shell').style.display = 'block';
+            document.getElementById('current-user-name').innerText = `${currentUser.name} (${currentUser.role})`;
+            document.getElementById('current-user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('add-user-menu-item').style.display = currentUser.role === 'Admin' ? 'block' : 'none';
+
+            loadDashboardStats();
+            loadNoticesFromAPI();
+            loadDemandNoticesFromAPI();
+            loadAssesseesFromAPI();
+            requestAnimationFrame(() => requestAnimationFrame(syncCalendarHeight));
+        }
+
+        // Wrapper around fetch() that attaches the JWT and handles expired/missing sessions
+        // in one place, so every API call below stays simple.
+        async function apiFetch(path, options = {}) {
+            const token = getToken();
+            const headers = Object.assign({}, options.headers, {
+                Authorization: `Bearer ${token}`,
+            });
+            if (options.body && !headers['Content-Type']) {
+                headers['Content-Type'] = 'application/json';
+            }
+            const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+            if (response.status === 401) {
+                clearSession();
+                showLoginScreen();
+                showToast('Session expired — please log in again.');
+                throw new Error('Unauthorized');
+            }
+            return response;
+        }
+
+        async function submitLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            const btn = document.getElementById('login-btn');
+            errorEl.style.display = 'none';
+
+            if (!email || !password) {
+                errorEl.innerText = 'Email and password are required.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Logging in...';
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    errorEl.innerText = result.error || 'Login failed.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                setSession(result.token, result.user);
+                document.getElementById('login-password').value = '';
+                showApp();
+            } catch (err) {
+                errorEl.innerText = 'Could not reach the API — is the server running?';
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Log In';
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function closeUserMenu() {
+            document.getElementById('user-menu').style.display = 'none';
+        }
+
+        // Close the dropdown if the person clicks anywhere else on the page
+        document.addEventListener('click', (e) => {
+            const profile = document.querySelector('.user-profile');
+            if (profile && !profile.contains(e.target)) {
+                closeUserMenu();
+            }
+        });
+
+        function logout() {
+            clearSession();
+            showLoginScreen();
+        }
+
+        // Allow Enter key to submit the login form
+        document.addEventListener('DOMContentLoaded', () => {
+            ['login-email', 'login-password'].forEach((id) => {
+                document.getElementById(id).addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') submitLogin();
+                });
+            });
+        });
+
+        // --- Add User (Admin only) ---
+        function openAddUserModal() {
+            document.getElementById('user-modal-name').value = '';
+            document.getElementById('user-modal-email').value = '';
+            document.getElementById('user-modal-password').value = '';
+            document.getElementById('user-modal-role').value = 'Staff';
+            document.getElementById('user-modal-error').style.display = 'none';
+            document.getElementById('addUserModal').classList.add('active');
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').classList.remove('active');
+        }
+
+        async function submitAddUser() {
+            const name = document.getElementById('user-modal-name').value.trim();
+            const email = document.getElementById('user-modal-email').value.trim();
+            const password = document.getElementById('user-modal-password').value;
+            const role = document.getElementById('user-modal-role').value;
+            const errorEl = document.getElementById('user-modal-error');
+            const btn = document.getElementById('user-modal-submit-btn');
+            errorEl.style.display = 'none';
+
+            if (!name || !email || !password) {
+                errorEl.innerText = 'Name, email and password are required.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Creating...';
+            try {
+                const response = await apiFetch('/auth/users', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, password, role }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    errorEl.innerText = result.error || 'Could not create user.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                closeAddUserModal();
+                showToast(`User ${email} created.`);
+                if (document.getElementById('all-users-view').classList.contains('active')) {
+                    loadAllUsersFromAPI();
+                }
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    errorEl.innerText = 'Could not reach the API — is the server running?';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Create User';
+            }
+        }
+
+        // --- All Users (FR-9.2): staff list + assigned assessees ---
+        async function loadAllUsersFromAPI() {
+            const tbody = document.getElementById('allUsersTableBody');
+            try {
+                const response = await apiFetch('/auth/users');
+                allStaffUsers = await response.json();
+
+                if (!allStaffUsers || allStaffUsers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">No staff yet. Click "+ Add User" to create one.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                allStaffUsers.forEach((u, index) => {
+                    const assigned = allAssessees.filter((a) => a.assigned_user_id === u.id);
+                    const assignedLabel = assigned.length > 0
+                        ? assigned.map((a) => a.pan_tan).join(', ')
+                        : '—';
+                    const row = `<tr>
+                        <td>${index + 1}</td>
+                        <td>${u.name}</td>
+                        <td>${u.email}</td>
+                        <td>${u.role}</td>
+                        <td>${assignedLabel}</td>
+                        <td><button class="btn" onclick="openAssignModal('${u.id}')">Assign</button></td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                if (err.message === 'Unauthorized') return;
+                console.error('Error fetching staff:', err);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#dc3545;">Could not load users — admin access required.</td></tr>`;
+            }
+        }
+
+        let assignModalUserId = null;
+
+        function openAssignModal(userId) {
+            assignModalUserId = userId;
+            const user = allStaffUsers.find((u) => u.id === userId);
+            document.getElementById('assign-modal-user-label').innerText = user
+                ? `Assigning for: ${user.name} (${user.email})`
+                : '';
+            document.getElementById('assign-modal-error').style.display = 'none';
+
+            const checklist = document.getElementById('assign-modal-checklist');
+            if (!allAssessees || allAssessees.length === 0) {
+                checklist.innerHTML = '<p style="font-size:12px; color:#888;">No assessees exist yet.</p>';
+            } else {
+                checklist.innerHTML = allAssessees.map((a) => `
+                    <label style="display:flex; align-items:center; gap:6px; padding:4px 0; font-size:13px;">
+                        <input type="checkbox" value="${a.id}" ${a.assigned_user_id === userId ? 'checked' : ''}>
+                        ${a.pan_tan} — ${a.legal_name}
+                    </label>
+                `).join('');
+            }
+
+            document.getElementById('assignModal').classList.add('active');
+        }
+
+        function closeAssignModal() {
+            document.getElementById('assignModal').classList.remove('active');
+        }
+
+        async function submitAssign() {
+            const checked = Array.from(document.querySelectorAll('#assign-modal-checklist input[type="checkbox"]:checked'))
+                .map((cb) => cb.value);
+            const unchecked = Array.from(document.querySelectorAll('#assign-modal-checklist input[type="checkbox"]:not(:checked)'))
+                .map((cb) => cb.value);
+            const errorEl = document.getElementById('assign-modal-error');
+            const btn = document.getElementById('assign-modal-submit-btn');
+            errorEl.style.display = 'none';
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+
+            try {
+                if (checked.length > 0) {
+                    const response = await apiFetch('/assessees/assign', {
+                        method: 'PATCH',
+                        body: JSON.stringify({ assessee_ids: checked, user_id: assignModalUserId }),
+                    });
+                    if (!response.ok) {
+                        const result = await response.json();
+                        errorEl.innerText = result.error || 'Could not save assignment.';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+                }
+                // Unassign anyone unchecked who was previously assigned to this user
+                const toUnassign = unchecked.filter((id) => {
+                    const a = allAssessees.find((x) => x.id === id);
+                    return a && a.assigned_user_id === assignModalUserId;
+                });
+                if (toUnassign.length > 0) {
+                    await apiFetch('/assessees/assign', {
+                        method: 'PATCH',
+                        body: JSON.stringify({ assessee_ids: toUnassign, user_id: null }),
+                    });
+                }
+
+                closeAssignModal();
+                showToast('Assignments updated.');
+                await loadAssesseesFromAPI();
+                loadAllUsersFromAPI();
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    errorEl.innerText = 'Could not reach the API — is the server running?';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Save';
+            }
+        }
+
+        // --- Report (FR-9.1): combined e-Proceeding + Outstanding Demand, filterable ---
+        let allReportNotices = [];
+
+        async function loadReportData() {
+            const tbody = document.getElementById('reportTableBody');
+            try {
+                const response = await apiFetch('/notices');
+                allReportNotices = await response.json();
+
+                const assesseeSelect = document.getElementById('reportAssesseeFilter');
+                const existingValue = assesseeSelect.value;
+                const uniquePanTans = [...new Set(allReportNotices.map((n) => n.pan_tan))];
+                assesseeSelect.innerHTML = '<option value="All">All</option>' +
+                    uniquePanTans.map((p) => `<option value="${p}">${p}</option>`).join('');
+                assesseeSelect.value = uniquePanTans.includes(existingValue) ? existingValue : 'All';
+
+                applyReportFilters();
+            } catch (err) {
+                if (err.message === 'Unauthorized') return;
+                console.error('Error fetching report data:', err);
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:#dc3545;">Could not load report data.</td></tr>`;
+            }
+        }
+
+        function applyReportFilters() {
+            const assessee = document.getElementById('reportAssesseeFilter').value;
+            const type = document.getElementById('reportTypeFilter').value;
+            const status = document.getElementById('reportStatusFilter').value;
+            const dateFrom = document.getElementById('reportDateFrom').value;
+            const dateTo = document.getElementById('reportDateTo').value;
+
+            const filtered = allReportNotices.filter((item) => {
+                const matchesAssessee = (assessee === 'All' || item.pan_tan === assessee);
+                const matchesType = (type === 'All' || item.notice_type === type);
+                const matchesStatus = (status === 'All' || item.status === status);
+                const issueDate = item.issue_date ? new Date(item.issue_date) : null;
+                const matchesFrom = !dateFrom || (issueDate && issueDate >= new Date(dateFrom));
+                const matchesTo = !dateTo || (issueDate && issueDate <= new Date(dateTo));
+                return matchesAssessee && matchesType && matchesStatus && matchesFrom && matchesTo;
+            });
+
+            renderReportTable(filtered);
+        }
+
+        function clearReportFilters() {
+            document.getElementById('reportAssesseeFilter').value = 'All';
+            document.getElementById('reportTypeFilter').value = 'All';
+            document.getElementById('reportStatusFilter').value = 'All';
+            document.getElementById('reportDateFrom').value = '';
+            document.getElementById('reportDateTo').value = '';
+            renderReportTable(allReportNotices);
+        }
+
+        function renderReportTable(data) {
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:#888;">No records match these filters.</td></tr>`;
+                return;
+            }
+
+            data.forEach((item) => {
+                const categoryLabel = (item.category || 'e_proceeding') === 'outstanding_demand' ? 'Outstanding Demand' : 'e-Proceeding';
+                const amount = item.demand_amount != null ? `₹${Number(item.demand_amount).toLocaleString('en-IN')}` : '—';
+                const row = `<tr>
+                    <td>${item.pan_tan}</td>
+                    <td>${item.legal_name}</td>
+                    <td>${categoryLabel}</td>
+                    <td>${item.notice_type || ''}</td>
+                    <td>${item.ay || ''}</td>
+                    <td>${item.issue_date ? new Date(item.issue_date).toLocaleDateString() : ''}</td>
+                    <td>${item.due_date ? new Date(item.due_date).toLocaleDateString() : ''}</td>
+                    <td>${amount}</td>
+                    <td>${item.status}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function exportReportToExcel() {
+            const rows = Array.from(document.querySelectorAll('#reportTableBody tr'));
+            if (rows.length === 0 || (rows[0].children.length === 1)) {
+                showToast('No report data available to export.');
+                return;
+            }
+
+            const assessee = document.getElementById('reportAssesseeFilter').value;
+            const type = document.getElementById('reportTypeFilter').value;
+            const status = document.getElementById('reportStatusFilter').value;
+            const dateFrom = document.getElementById('reportDateFrom').value;
+            const dateTo = document.getElementById('reportDateTo').value;
+
+            const filtered = allReportNotices.filter((item) => {
+                const matchesAssessee = (assessee === 'All' || item.pan_tan === assessee);
+                const matchesType = (type === 'All' || item.notice_type === type);
+                const matchesStatus = (status === 'All' || item.status === status);
+                const issueDate = item.issue_date ? new Date(item.issue_date) : null;
+                const matchesFrom = !dateFrom || (issueDate && issueDate >= new Date(dateFrom));
+                const matchesTo = !dateTo || (issueDate && issueDate <= new Date(dateTo));
+                return matchesAssessee && matchesType && matchesStatus && matchesFrom && matchesTo;
+            });
+
+            const excelData = filtered.map((item) => ({
+                "PAN/TAN": item.pan_tan || '',
+                "Name of Assessee": item.legal_name || '',
+                "Category": (item.category || 'e_proceeding') === 'outstanding_demand' ? 'Outstanding Demand' : 'e-Proceeding',
+                "Notice Type": item.notice_type || '',
+                "A.Y.": item.ay || '',
+                "F.Y.": item.fy || '',
+                "Issue Date": item.issue_date ? new Date(item.issue_date).toLocaleDateString() : '',
+                "Due Date": item.due_date ? new Date(item.due_date).toLocaleDateString() : '',
+                "Demand Amount": item.demand_amount || 0,
+                "Priority Status": item.priority_status || 'Normal',
+                "Status": item.status || 'Open'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+
+            XLSX.writeFile(workbook, "Report.xlsx");
+            showToast('Exported Report.xlsx successfully!');
+        }
+
+        // --- App bootstrap ---
+        // Forces the calendar box to be EXACTLY as tall as the stat-cards column,
+        // measured live in the browser — avoids gap/overlap from CSS guesswork.
+        function syncCalendarHeight() {
+            const left = document.querySelector('.dashboard-left');
+            const section = document.querySelector('.calendar-section');
+            if (left && section && document.getElementById('dashboard-view').classList.contains('active')) {
+                section.style.height = left.offsetHeight + 'px';
+            }
+        }
+
+        window.addEventListener('resize', syncCalendarHeight);
+
+        window.onload = async function() {
+            const token = getToken();
+            const storedUser = localStorage.getItem('notice_alert_user');
+            if (!token || !storedUser) {
+                showLoginScreen();
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!response.ok) throw new Error('Invalid session');
+                currentUser = JSON.parse(storedUser);
+                showApp();
+            } catch (err) {
+                clearSession();
+                showLoginScreen();
+            }
+        };
+
+        // --- Calendar ---
+        function ymd(date) {
+            return date.toISOString().slice(0, 10);
+        }
+
+        function buildNoticeDateSets(notices) {
+            const issueDates = new Set();
+            const dueDates = new Set();
+            (notices || []).forEach((n) => {
+                if (n.issue_date) issueDates.add(String(n.issue_date).slice(0, 10));
+                if (n.due_date) dueDates.add(String(n.due_date).slice(0, 10));
+            });
+            return { issueDates, dueDates };
+        }
+
+        function renderCalendar() {
+            const year = calendarViewDate.getUTCFullYear();
+            const month = calendarViewDate.getUTCMonth();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendar-month-label').innerText = `${monthNames[month]} ${year}`;
+
+            const { issueDates, dueDates } = buildNoticeDateSets(allNotices);
+
+            const firstOfMonth = new Date(Date.UTC(year, month, 1));
+            const startWeekday = firstOfMonth.getUTCDay();
+            const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+            const daysInPrevMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+            const grid = document.getElementById('calendarGrid');
+            grid.querySelectorAll('.calendar-day').forEach((el) => el.remove());
+
+            const cells = [];
+            for (let i = 0; i < startWeekday; i++) {
+                cells.push({ label: daysInPrevMonth - startWeekday + 1 + i, other: true });
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = ymd(new Date(Date.UTC(year, month, d)));
+                cells.push({
+                    label: d,
+                    dateStr,
+                    other: false,
+                    hasIssue: issueDates.has(dateStr),
+                    hasDue: dueDates.has(dateStr),
+                });
+            }
+            let trailing = 1;
+            while (cells.length % 7 !== 0) {
+                cells.push({ label: trailing++, other: true });
+            }
+
+            cells.forEach((cell) => {
+                const div = document.createElement('div');
+                let cls = 'calendar-day';
+                if (cell.other) cls += ' other-month';
+                if (cell.hasIssue) cls += ' has-issue';
+                if (cell.hasDue) cls += ' has-due';
+                if (!cell.other && (cell.hasIssue || cell.hasDue)) {
+                    cls += ' clickable';
+                    div.onclick = () => filterByDate(cell.dateStr);
+                }
+                div.className = cls;
+                div.innerText = cell.label;
+                grid.appendChild(div);
+            });
+        }
+
+        function prevMonth() {
+            calendarViewDate = new Date(Date.UTC(calendarViewDate.getUTCFullYear(), calendarViewDate.getUTCMonth() - 1, 1));
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            calendarViewDate = new Date(Date.UTC(calendarViewDate.getUTCFullYear(), calendarViewDate.getUTCMonth() + 1, 1));
+            renderCalendar();
+        }
+
+        // Clicking a marked calendar day jumps to e-Proceeding filtered to that date's notices
+        function filterByDate(dateStr) {
+            switchTab('e-proceeding');
+            clearFilters();
+            const filtered = allNotices.filter(
+                (n) => String(n.issue_date).slice(0, 10) === dateStr || String(n.due_date).slice(0, 10) === dateStr
+            );
+            renderEProceedingTable(filtered);
+            showToast(`Showing notices for ${dateStr}`);
+        }
+
+        // Load card counts from PostgreSQL
+        async function loadDashboardStats() {
+            try {
+                const response = await apiFetch('/dashboard/stats');
+                const data = await response.json();
+
+                document.querySelector('#card-all .card-value').innerText = data.totalNotices || 0;
+                document.querySelector('#card-15days .card-value').innerText = data.last15Days || 0;
+                document.querySelector('#card-24hours .card-value').innerText = data.last24Hours || 0;
+                document.querySelector('#card-pantan .card-value').innerText = data.totalAssessees || 0;
+                document.querySelector('#card-open .card-value').childNodes[0].nodeValue = (data.openNotices || 0) + ' ';
+                document.querySelector('#card-7days .card-value').childNodes[0].nodeValue = (data.sevenDaysDue || 0) + ' ';
+                document.querySelector('#card-overdue .card-value').childNodes[0].nodeValue = (data.overDue || 0) + ' ';
+                document.querySelector('#card-failed .card-value').innerText = data.failedLogins || 0;
+            } catch (err) {
+                console.error('Error loading stats:', err);
+            }
+        }
+
+        // Fetch notices from PostgreSQL
+        async function loadNoticesFromAPI() {
+            try {
+                const response = await apiFetch('/notices');
+                allNotices = await response.json();
+                document.getElementById('e-proceeding-count-badge').innerText = `E-Proceeding (${allNotices.length})`;
+                renderCalendar();
+            } catch (err) {
+                console.error('Error fetching notices:', err);
+            }
+        }
+
+        // Outstanding Demand — separate category, own array (FR-7.2)
+        async function loadDemandNoticesFromAPI() {
+            try {
+                const response = await apiFetch('/notices?category=outstanding_demand');
+                allDemandNotices = await response.json();
+                document.getElementById('outstanding-count-badge').innerText = `Outstanding Demand (${allDemandNotices.length})`;
+            } catch (err) {
+                console.error('Error fetching demand notices:', err);
+            }
+        }
+
+        function renderDemandTable(data) {
+            const tbody = document.getElementById('outstandingTableBody');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:#888;">No outstanding demand records found.</td></tr>`;
+                return;
+            }
+
+            data.forEach((item) => {
+                const amount = item.demand_amount != null ? Number(item.demand_amount).toLocaleString('en-IN') : '0';
+                const row = `<tr>
+                    <td><input type="checkbox" data-notice-id="${item.id}"></td>
+                    <td><a href="#" style="color:#0d6efd">${item.pan_tan}</a></td>
+                    <td>${item.legal_name}</td>
+                    <td>${item.notice_ref_id || (item.id ? item.id.substring(0, 12) : '')}</td>
+                    <td>${item.section || ''}</td>
+                    <td>${item.ay || '2024-25'}</td>
+                    <td>${item.fy || '2023-24'}</td>
+                    <td>₹${amount}</td>
+                    <td>${item.status}</td>
+                    <td class="action-icons">
+                        <i class="fa-regular fa-file-pdf icon-red" style="cursor:pointer;" onclick="showToast('Opening PDF Notice...')"></i>
+                        <i class="fa-regular fa-pen-to-square icon-blue" style="cursor:pointer;" onclick="showToast('Editing ${item.pan_tan}')"></i>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function applyOutstandingFilters() {
+            const ay = document.getElementById('odAyFilter').value;
+            const status = document.getElementById('odStatusFilter').value;
+            const search = document.getElementById('odSearchInput').value.toLowerCase();
+
+            const filtered = allDemandNotices.filter(item => {
+                const matchesAY = (ay === 'All' || item.ay === ay);
+                const matchesStatus = (status === 'All' || item.status === status);
+                const matchesSearch = item.pan_tan.toLowerCase().includes(search) || item.legal_name.toLowerCase().includes(search);
+                return matchesAY && matchesStatus && matchesSearch;
+            });
+
+            renderDemandTable(filtered);
+        }
+
+        function clearOutstandingFilters() {
+            document.getElementById('odAyFilter').value = 'All';
+            document.getElementById('odStatusFilter').value = 'All';
+            document.getElementById('odSearchInput').value = '';
+            renderDemandTable(allDemandNotices);
+        }
+
+        function toggleSelectAllIn(tbodyId, master) {
+            const checkboxes = document.querySelectorAll(`#${tbodyId} input[type="checkbox"]`);
+            checkboxes.forEach(cb => cb.checked = master.checked);
+        }
+
+        function exportOutstandingToExcel() {
+            if (!allDemandNotices || allDemandNotices.length === 0) {
+                showToast('No outstanding demand data available to export.');
+                return;
+            }
+
+            const excelData = allDemandNotices.map((item) => ({
+                "PAN/TAN": item.pan_tan || '',
+                "Name of Assessee": item.legal_name || '',
+                "Notice Reference ID": item.notice_ref_id || (item.id ? item.id.substring(0, 12) : ''),
+                "Section": item.section || '',
+                "A.Y.": item.ay || '2024-25',
+                "F. Y.": item.fy || '2023-24',
+                "Demand Amount": item.demand_amount || 0,
+                "Issued On": item.issue_date ? new Date(item.issue_date).toLocaleDateString() : '',
+                "Response Due Date": item.due_date ? new Date(item.due_date).toLocaleDateString() : '',
+                "Priority Status": item.priority_status || 'Normal',
+                "Status": item.status || 'Open'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "OutstandingDemand");
+
+            XLSX.writeFile(workbook, "OutstandingDemand.xlsx");
+            showToast('Exported OutstandingDemand.xlsx successfully!');
+        }
+
+        // Fetch assessees from PostgreSQL and render the Dashboard table
+        async function loadAssesseesFromAPI() {
+            const tbody = document.getElementById('assesseeTableBody');
+            try {
+                const response = await apiFetch('/assessees');
+                allAssessees = await response.json();
+
+                if (!allAssessees || allAssessees.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">No assessees yet. Click "Add Assessee" to create one.</td></tr>`;
+                } else {
+                    tbody.innerHTML = '';
+                    allAssessees.forEach((a, index) => {
+                        const incDate = a.incorporation_date
+                            ? new Date(a.incorporation_date).toLocaleDateString('en-GB').split('/').join('-')
+                            : '—';
+                        const row = `<tr>
+                            <td>${index + 1}</td>
+                            <td><a href="#" style="color:#0d6efd">${a.pan_tan}</a></td>
+                            <td>${a.legal_name}</td>
+                            <td>${a.username || a.pan_tan}</td>
+                            <td>${incDate}</td>
+                            <td><i class="fa-regular fa-pen-to-square icon-blue" style="cursor:pointer;" onclick="openEditAssesseeModal('${a.id}')"></i></td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                }
+                renderPanList();
+            } catch (err) {
+                console.error('Error fetching assessees:', err);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#dc3545;">Could not load assessees — is the API running?</td></tr>`;
+            }
+        }
+
+        // PAN List view (reached via the "Total PAN/TAN" stat card) — real data, same source as the Dashboard table
+        function renderPanList() {
+            const tbody = document.getElementById('panListTableBody');
+            if (!tbody) return;
+
+            if (!allAssessees || allAssessees.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">No assessees yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            allAssessees.forEach((a, index) => {
+                const row = `<tr>
+                    <td>${index + 1}</td>
+                    <td><a href="#" style="color:#0d6efd">${a.pan_tan}</a></td>
+                    <td>${a.legal_name}</td>
+                    <td>${a.active === false ? 'Inactive' : 'Active'}</td>
+                    <td>${a.assigned_user_name || '—'}</td>
+                    <td><i class="fa-regular fa-pen-to-square icon-blue" style="cursor:pointer;" onclick="openEditAssesseeModal('${a.id}')"></i></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // --- Add Assessee modal ---
+        function openAddAssesseeModal() {
+            document.getElementById('modal-pan-tan').value = '';
+            document.getElementById('modal-legal-name').value = '';
+            document.getElementById('modal-incorporation-date').value = '';
+            document.getElementById('modal-portal').value = '';
+            document.getElementById('modal-username').value = '';
+            document.getElementById('modal-password').value = '';
+            document.getElementById('modal-error').style.display = 'none';
+            document.getElementById('addAssesseeModal').classList.add('active');
+        }
+
+        function closeAddAssesseeModal() {
+            document.getElementById('addAssesseeModal').classList.remove('active');
+        }
+
+        async function submitAddAssessee() {
+            const panTan = document.getElementById('modal-pan-tan').value.trim();
+            const legalName = document.getElementById('modal-legal-name').value.trim();
+            const incorporationDate = document.getElementById('modal-incorporation-date').value;
+            const portal = document.getElementById('modal-portal').value;
+            const username = document.getElementById('modal-username').value.trim();
+            const password = document.getElementById('modal-password').value;
+            const errorEl = document.getElementById('modal-error');
+            const submitBtn = document.getElementById('modal-submit-btn');
+
+            errorEl.style.display = 'none';
+
+            if (!panTan || !legalName) {
+                errorEl.innerText = 'PAN/TAN and Legal Name are required.';
+                errorEl.style.display = 'block';
+                return;
+            }
+            if (!/^[A-Za-z0-9]{10}$/.test(panTan)) {
+                errorEl.innerText = 'PAN/TAN must be exactly 10 alphanumeric characters.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Saving...';
+
+            try {
+                const response = await apiFetch('/assessee/add', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        pan_tan: panTan,
+                        legal_name: legalName,
+                        incorporation_date: incorporationDate || null,
+                        portal: portal || null,
+                        username: username || null,
+                        password: password || null,
+                    }),
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    errorEl.innerText = result.error || 'Something went wrong.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                closeAddAssesseeModal();
+                showToast(`Assessee ${panTan} added.`);
+                loadAssesseesFromAPI();
+                loadDashboardStats();
+                loadNoticesFromAPI();
+            } catch (err) {
+                errorEl.innerText = 'Could not reach the API — is the server running?';
+                errorEl.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Save Assessee';
+            }
+        }
+
+        // --- Edit Assessee (FR-2.3) ---
+        let editModalAssesseeId = null;
+
+        function openEditAssesseeModal(assesseeId) {
+            const a = allAssessees.find((x) => x.id === assesseeId);
+            if (!a) {
+                showToast('Could not find that assessee.');
+                return;
+            }
+            editModalAssesseeId = assesseeId;
+
+            document.getElementById('edit-modal-pan-tan').value = a.pan_tan;
+            document.getElementById('edit-modal-legal-name').value = a.legal_name;
+            document.getElementById('edit-modal-incorporation-date').value = a.incorporation_date
+                ? new Date(a.incorporation_date).toISOString().slice(0, 10)
+                : '';
+            document.getElementById('edit-modal-active').value = a.active === false ? 'false' : 'true';
+            document.getElementById('edit-modal-portal').value = '';
+            document.getElementById('edit-modal-username').value = a.username || '';
+            document.getElementById('edit-modal-password').value = '';
+            document.getElementById('edit-modal-error').style.display = 'none';
+
+            document.getElementById('editAssesseeModal').classList.add('active');
+        }
+
+        function closeEditAssesseeModal() {
+            document.getElementById('editAssesseeModal').classList.remove('active');
+        }
+
+        async function submitEditAssessee() {
+            const legalName = document.getElementById('edit-modal-legal-name').value.trim();
+            const incorporationDate = document.getElementById('edit-modal-incorporation-date').value;
+            const active = document.getElementById('edit-modal-active').value === 'true';
+            const portal = document.getElementById('edit-modal-portal').value;
+            const username = document.getElementById('edit-modal-username').value.trim();
+            const password = document.getElementById('edit-modal-password').value;
+            const errorEl = document.getElementById('edit-modal-error');
+            const btn = document.getElementById('edit-modal-submit-btn');
+            errorEl.style.display = 'none';
+
+            if (!legalName) {
+                errorEl.innerText = 'Legal Name is required.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+            try {
+                const response = await apiFetch(`/assessee/${editModalAssesseeId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        legal_name: legalName,
+                        incorporation_date: incorporationDate || null,
+                        active,
+                        portal: portal || null,
+                        username: username || null,
+                        password: password || null,
+                    }),
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    errorEl.innerText = result.error || 'Something went wrong.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                closeEditAssesseeModal();
+                showToast('Assessee updated.');
+                await loadAssesseesFromAPI();
+                if (document.getElementById('all-users-view').classList.contains('active')) {
+                    loadAllUsersFromAPI();
+                }
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    errorEl.innerText = 'Could not reach the API — is the server running?';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Save Changes';
+            }
+        }
+
+        // --- Email Ingestion (FR-4.1–4.6) ---
+        let allEmailAccounts = [];
+        let allUnmatchedNotices = [];
+
+        async function loadEmailAccounts() {
+            const tbody = document.getElementById('emailAccountsTableBody');
+            try {
+                const response = await apiFetch('/email-accounts');
+                allEmailAccounts = await response.json();
+
+                if (!allEmailAccounts || allEmailAccounts.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">No mailbox connected yet.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                allEmailAccounts.forEach((acc) => {
+                    const row = `<tr>
+                        <td>${acc.email_address}</td>
+                        <td>${acc.imap_host}:${acc.imap_port}</td>
+                        <td>${acc.active ? 'Active' : 'Inactive'}</td>
+                        <td>${acc.last_uid_seen || 0}</td>
+                        <td class="action-icons">
+                            <button class="btn" onclick="syncEmailAccount('${acc.id}')">Sync Now</button>
+                            <button class="btn" onclick="disconnectEmailAccount('${acc.id}')">Disconnect</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                if (err.message === 'Unauthorized') return;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#dc3545;">Could not load mailboxes — admin access required.</td></tr>`;
+            }
+        }
+
+        async function connectEmailAccount() {
+            const host = document.getElementById('email-host').value.trim();
+            const port = document.getElementById('email-port').value || 993;
+            const address = document.getElementById('email-address').value.trim();
+            const appPassword = document.getElementById('email-app-password').value;
+
+            if (!host || !address || !appPassword) {
+                showToast('Host, email address, and app password are all required.');
+                return;
+            }
+
+            try {
+                const response = await apiFetch('/email-accounts', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        imap_host: host,
+                        imap_port: parseInt(port, 10),
+                        email_address: address,
+                        app_password: appPassword,
+                    }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    showToast(result.error || 'Could not connect mailbox.');
+                    return;
+                }
+                document.getElementById('email-host').value = '';
+                document.getElementById('email-address').value = '';
+                document.getElementById('email-app-password').value = '';
+                showToast('Mailbox connected.');
+                loadEmailAccounts();
+            } catch (err) {
+                if (err.message !== 'Unauthorized') showToast('Could not reach the API — is the server running?');
+            }
+        }
+
+        async function syncEmailAccount(accountId) {
+            showToast('Checking mailbox for new mail...');
+            try {
+                const response = await apiFetch(`/email-accounts/${accountId}/sync`, { method: 'POST' });
+                const result = await response.json();
+                if (!response.ok) {
+                    showToast(result.error || 'Sync failed.');
+                    return;
+                }
+                showToast(
+                    `Fetched ${result.fetched}: ${result.matched} matched, ${result.unmatched} need review, ${result.duplicates} already seen.`
+                );
+                await Promise.all([loadEmailAccounts(), loadUnmatchedNotices(), loadNoticesFromAPI(), loadDashboardStats()]);
+            } catch (err) {
+                if (err.message !== 'Unauthorized') showToast('Could not reach the API — is the server running?');
+            }
+        }
+
+        async function disconnectEmailAccount(accountId) {
+            try {
+                await apiFetch(`/email-accounts/${accountId}`, { method: 'DELETE' });
+                showToast('Mailbox disconnected.');
+                loadEmailAccounts();
+            } catch (err) {
+                if (err.message !== 'Unauthorized') showToast('Could not reach the API — is the server running?');
+            }
+        }
+
+        async function loadUnmatchedNotices() {
+            const tbody = document.getElementById('unmatchedTableBody');
+            try {
+                const response = await apiFetch('/unmatched-notices');
+                allUnmatchedNotices = await response.json();
+
+                if (!allUnmatchedNotices || allUnmatchedNotices.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">Nothing pending review.</td></tr>`;
+                    return;
+                }
+
+                const assesseeOptions = allAssessees
+                    .map((a) => `<option value="${a.id}">${a.pan_tan} — ${a.legal_name}</option>`)
+                    .join('');
+
+                tbody.innerHTML = '';
+                allUnmatchedNotices.forEach((n) => {
+                    const received = n.received_at ? new Date(n.received_at).toLocaleString() : '';
+                    const row = `<tr>
+                        <td>${received}</td>
+                        <td>${n.sender || ''}</td>
+                        <td>${n.subject || ''}</td>
+                        <td>${n.extracted_pan || '—'}</td>
+                        <td>
+                            <select id="unmatched-select-${n.id}">
+                                <option value="">-- choose --</option>
+                                ${assesseeOptions}
+                            </select>
+                        </td>
+                        <td class="action-icons">
+                            <button class="btn" onclick="matchUnmatchedNotice('${n.id}')">Match</button>
+                            <button class="btn" onclick="ignoreUnmatchedNotice('${n.id}')">Ignore</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                if (err.message === 'Unauthorized') return;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#dc3545;">Could not load review queue.</td></tr>`;
+            }
+        }
+
+        async function matchUnmatchedNotice(unmatchedId) {
+            const select = document.getElementById(`unmatched-select-${unmatchedId}`);
+            const assesseeId = select.value;
+            if (!assesseeId) {
+                showToast('Choose which assessee this belongs to first.');
+                return;
+            }
+            try {
+                const response = await apiFetch(`/unmatched-notices/${unmatchedId}/match`, {
+                    method: 'POST',
+                    body: JSON.stringify({ assessee_id: assesseeId }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    showToast(result.error || 'Could not match.');
+                    return;
+                }
+                showToast('Matched and filed as a notice.');
+                await Promise.all([loadUnmatchedNotices(), loadNoticesFromAPI(), loadDashboardStats()]);
+            } catch (err) {
+                if (err.message !== 'Unauthorized') showToast('Could not reach the API — is the server running?');
+            }
+        }
+
+        async function ignoreUnmatchedNotice(unmatchedId) {
+            try {
+                await apiFetch(`/unmatched-notices/${unmatchedId}/ignore`, { method: 'POST' });
+                showToast('Dismissed.');
+                loadUnmatchedNotices();
+            } catch (err) {
+                if (err.message !== 'Unauthorized') showToast('Could not reach the API — is the server running?');
+            }
+        }
+
+        // --- Download Template (FR-2.2) ---
+        function downloadAssesseeTemplate() {
+            const templateData = [
+                { 'PAN/TAN': 'ABCDE1234F', 'Legal Name': 'EXAMPLE NAME', 'Incorporation Date (YYYY-MM-DD)': '2000-01-31' },
+            ];
+            const worksheet = XLSX.utils.json_to_sheet(templateData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
+            XLSX.writeFile(workbook, 'AssesseeImportTemplate.xlsx');
+            showToast('Template downloaded.');
+        }
+
+        // --- Import (FR-2.2) ---
+        function triggerImportFile() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                let rows;
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonRows = XLSX.utils.sheet_to_json(sheet);
+
+                    rows = jsonRows
+                        .map((r) => {
+                            let incDate = r['Incorporation Date (YYYY-MM-DD)'] || r['Incorporation Date'] || null;
+                            if (incDate instanceof Date && !isNaN(incDate)) {
+                                incDate = incDate.toISOString().slice(0, 10);
+                            } else if (incDate) {
+                                incDate = String(incDate).trim();
+                            }
+                            return {
+                                pan_tan: (r['PAN/TAN'] || r['PAN TAN'] || r['PAN'] || '').toString().trim(),
+                                legal_name: (r['Legal Name'] || r['Name of Assessee'] || r['Name'] || '').toString().trim(),
+                                incorporation_date: incDate || null,
+                            };
+                        })
+                        .filter((r) => r.pan_tan || r.legal_name); // drop fully blank rows
+                } catch (parseErr) {
+                    console.error('Excel parse error:', parseErr);
+                    showToast('Could not read that file — make sure it is a valid .xlsx.');
+                    event.target.value = '';
+                    return;
+                }
+
+                if (rows.length === 0) {
+                    showToast('No rows found in that file.');
+                    event.target.value = '';
+                    return;
+                }
+
+                try {
+                    showToast(`Importing ${rows.length} row(s)...`);
+                    const response = await apiFetch('/assessees/bulk-import', {
+                        method: 'POST',
+                        body: JSON.stringify({ rows }),
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        showToast(result.error || 'Import failed.');
+                        return;
+                    }
+
+                    let summary = `Imported ${result.insertedCount}, skipped ${result.skippedCount}.`;
+                    if (result.skipped && result.skipped.length > 0) {
+                        console.log('Skipped rows:', result.skipped);
+                    }
+                    showToast(summary);
+                    await loadAssesseesFromAPI();
+                    loadDashboardStats();
+                    loadNoticesFromAPI();
+                } catch (err) {
+                    if (err.message !== 'Unauthorized') {
+                        console.error('Import network error:', err);
+                        showToast('Could not reach the API — is the server running?');
+                    }
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- Sync All (mocked) ---
+        async function syncAll() {
+            const btn = document.getElementById('sync-all-btn');
+            btn.disabled = true;
+            btn.innerText = 'Syncing...';
+            showToast('Syncing all entries...');
+
+            try {
+                const response = await apiFetch('/assessees/sync-all', { method: 'POST' });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showToast(result.error || 'Sync failed.');
+                    return;
+                }
+
+                showToast(
+                    `Sync complete: ${result.successCount} OK, ${result.failCount} failed, ${result.newNoticeCount} new notice(s).`
+                );
+
+                await Promise.all([loadDashboardStats(), loadNoticesFromAPI(), loadDemandNoticesFromAPI(), loadAssesseesFromAPI()]);
+            } catch (err) {
+                showToast('Could not reach the API — is the server running?');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Sync All';
+            }
+        }
+
+        // Opens the e-Proceeding interface directly when clicking ANY metric card
+        function openEProceedingWithFilter(filterType) {
+            switchTab('e-proceeding');
+
+            clearFilters();
+
+            if (filterType === 'open') {
+                document.getElementById('statusFilter').value = 'Open';
+            } else if (filterType === '15days') {
+                document.getElementById('dateFilter').value = 'Last 15 Days';
+            }
+
+            applyFilters();
+            showToast(`Opened e-Proceeding for: ${filterType}`);
+        }
+
+        // Render rows in the e-Proceeding table
+        function renderEProceedingTable(data) {
+            const tbody = document.getElementById('eProceedingTableBody');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:#888;">No notice records found.</td></tr>`;
+                return;
+            }
+
+            data.forEach((item) => {
+                const row = `<tr>
+                    <td><input type="checkbox" data-notice-id="${item.id}"></td>
+                    <td><a href="#" style="color:#0d6efd">${item.pan_tan}</a></td>
+                    <td>${item.legal_name}</td>
+                    <td>${item.notice_ref_id || (item.id ? item.id.substring(0, 12) : '')}</td>
+                    <td>${item.notice_type || 'Assessment Proceeding'}</td>
+                    <td>${item.ay || '2024-25'}</td>
+                    <td>${item.fy || '2023-24'}</td>
+                    <td>${item.status}</td>
+                    <td class="action-icons">
+                        <i class="fa-regular fa-file-pdf icon-red" style="cursor:pointer;" onclick="showToast('Opening PDF Notice...')"></i>
+                        <i class="fa-regular fa-pen-to-square icon-blue" style="cursor:pointer;" onclick="showToast('Editing ${item.pan_tan}')"></i>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Dynamic Filtering — Assessment Year, Type of Proceeding, Status,
+        // Priority Status, the quick date filter, and search all apply together.
+        function applyFilters() {
+            const ay = document.getElementById('ayFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const priority = document.getElementById('priorityFilter').value;
+            const dateRange = document.getElementById('dateFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            const fifteenDaysAgo = new Date();
+            fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+
+            let filtered = allNotices.filter(item => {
+                const matchesCategory = (item.category || 'e_proceeding') === 'e_proceeding';
+                const matchesAY = (ay === 'All' || item.ay === ay);
+                const matchesType = (type === 'All' || item.notice_type === type);
+                const matchesStatus = (status === 'All' || item.status === status);
+                const matchesPriority = (priority === 'All' || (item.priority_status || 'Normal') === priority);
+                const matchesDate = (dateRange === 'All' || !item.issue_date || new Date(item.issue_date) >= fifteenDaysAgo);
+                const matchesSearch = item.pan_tan.toLowerCase().includes(search) || item.legal_name.toLowerCase().includes(search);
+                return matchesCategory && matchesAY && matchesType && matchesStatus && matchesPriority && matchesDate && matchesSearch;
+            });
+
+            renderEProceedingTable(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('ayFilter').value = 'All';
+            document.getElementById('typeFilter').value = 'All';
+            document.getElementById('statusFilter').value = 'All';
+            document.getElementById('priorityFilter').value = 'All';
+            document.getElementById('dateFilter').value = 'All';
+            document.getElementById('searchInput').value = '';
+            renderEProceedingTable(allNotices);
+        }
+
+        // --- Bulk Update Status / Priority (checked rows only) ---
+        function getSelectedNoticeIds(scope) {
+            const tbodyId = scope === 'outstanding' ? 'outstandingTableBody' : 'eProceedingTableBody';
+            return Array.from(document.querySelectorAll(`#${tbodyId} input[type="checkbox"]:checked`))
+                .map((cb) => cb.getAttribute('data-notice-id'));
+        }
+
+        let bulkUpdateMode = 'status'; // 'status' or 'priority'
+        let bulkUpdateScope = 'eproceeding'; // 'eproceeding' or 'outstanding'
+
+        function openBulkUpdateModal(mode, scope) {
+            scope = scope || 'eproceeding';
+            const ids = getSelectedNoticeIds(scope);
+            if (ids.length === 0) {
+                showToast('Select at least one row first.');
+                return;
+            }
+            bulkUpdateMode = mode;
+            bulkUpdateScope = scope;
+            const title = document.getElementById('bulk-modal-title');
+            const label = document.getElementById('bulk-modal-label');
+            const valueSelect = document.getElementById('bulk-modal-value');
+            const countText = document.getElementById('bulk-modal-count');
+
+            countText.innerText = `Applying to ${ids.length} selected notice(s).`;
+            document.getElementById('bulk-modal-error').style.display = 'none';
+
+            if (mode === 'status') {
+                title.innerText = 'Update Status';
+                label.innerText = 'New Status';
+                valueSelect.innerHTML = `
+                    <option value="Open">Open</option>
+                    <option value="In_Progress">In Progress</option>
+                    <option value="Replied">Replied</option>
+                    <option value="Closed">Closed</option>
+                `;
+            } else {
+                title.innerText = 'Update Priority';
+                label.innerText = 'New Priority';
+                valueSelect.innerHTML = `
+                    <option value="Normal">Normal</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                `;
+            }
+
+            document.getElementById('bulkUpdateModal').classList.add('active');
+        }
+
+        function closeBulkUpdateModal() {
+            document.getElementById('bulkUpdateModal').classList.remove('active');
+        }
+
+        async function submitBulkUpdate() {
+            const ids = getSelectedNoticeIds(bulkUpdateScope);
+            const value = document.getElementById('bulk-modal-value').value;
+            const errorEl = document.getElementById('bulk-modal-error');
+            const btn = document.getElementById('bulk-modal-submit-btn');
+            errorEl.style.display = 'none';
+
+            if (ids.length === 0) {
+                errorEl.innerText = 'No rows selected.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const body = bulkUpdateMode === 'status' ? { ids, status: value } : { ids, priority_status: value };
+
+            btn.disabled = true;
+            btn.innerText = 'Applying...';
+            try {
+                const response = await apiFetch('/notices/bulk-update', {
+                    method: 'PATCH',
+                    body: JSON.stringify(body),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    errorEl.innerText = result.error || 'Could not update.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                closeBulkUpdateModal();
+                showToast(`Updated ${result.updatedCount} notice(s).`);
+                if (bulkUpdateScope === 'outstanding') {
+                    await loadDemandNoticesFromAPI();
+                    applyOutstandingFilters();
+                } else {
+                    await loadNoticesFromAPI();
+                    applyFilters();
+                }
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    errorEl.innerText = 'Could not reach the API — is the server running?';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Apply';
+            }
+        }
+
+        // Tab Navigation
+        function switchTab(tabName) {
+            document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (tabName === 'product') {
+                document.getElementById('product-view').classList.add('active');
+                document.getElementById('nav-product').classList.add('active');
+                loadEmailAccounts();
+                loadUnmatchedNotices();
+            } else if (tabName === 'dashboard') {
+                document.getElementById('dashboard-view').classList.add('active');
+                document.getElementById('nav-dashboard').classList.add('active');
+                loadDashboardStats();
+                loadAssesseesFromAPI();
+                requestAnimationFrame(() => requestAnimationFrame(syncCalendarHeight));
+            } else if (tabName === 'e-proceeding') {
+                document.getElementById('e-proceeding-view').classList.add('active');
+                document.getElementById('nav-e-proceeding').classList.add('active');
+                applyFilters();
+            } else if (tabName === 'pan-list') {
+                document.getElementById('pan-list-view').classList.add('active');
+                renderPanList();
+            } else if (tabName === 'outstanding') {
+                document.getElementById('outstanding-view').classList.add('active');
+                document.getElementById('nav-outstanding').classList.add('active');
+                applyOutstandingFilters();
+            } else if (tabName === 'all-users') {
+                document.getElementById('all-users-view').classList.add('active');
+                document.getElementById('nav-all-users').classList.add('active');
+                loadAllUsersFromAPI();
+            } else if (tabName === 'report') {
+                document.getElementById('report-view').classList.add('active');
+                document.getElementById('nav-report').classList.add('active');
+                loadReportData();
+            }
+        }
+
+        function toggleSelectAll(master) {
+            const checkboxes = document.querySelectorAll('#eProceedingTableBody input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = master.checked);
+        }
+
+        // Export to Excel mapped across all 23 clean headline titles
+        function exportToExcel() {
+            const eProceedingOnly = allNotices.filter((item) => (item.category || 'e_proceeding') === 'e_proceeding');
+            if (!eProceedingOnly || eProceedingOnly.length === 0) {
+                showToast('No notice data available to export.');
+                return;
+            }
+
+            const excelData = eProceedingOnly.map((item) => ({
+                "PAN/TAN": item.pan_tan || '',
+                "Name of Assessee": item.legal_name || '',
+                "Notice Reference ID": item.notice_ref_id || (item.id ? item.id.substring(0, 12) : ''),
+                "Proceeding Name": item.notice_type || 'Assessment Proceeding',
+                "A.Y.": item.ay || '2024-25',
+                "F. Y.": item.fy || '2023-24',
+                "Issued On": item.issue_date ? new Date(item.issue_date).toLocaleDateString() : '',
+                "Response Due Date": item.due_date ? new Date(item.due_date).toLocaleDateString() : '',
+                "Extended Due Date": item.extended_due_date ? new Date(item.extended_due_date).toLocaleDateString() : '',
+                "Replied Date": item.replied_date ? new Date(item.replied_date).toLocaleDateString() : '',
+                "Demand Amount": item.demand_amount || 0,
+                "Proceeding Closer Date": item.proceeding_closure_date ? new Date(item.proceeding_closure_date).toLocaleDateString() : '',
+                "Proceeding Closer Order": item.proceeding_closure_order || '',
+                "Proceeding Limitation Date": item.limitation_date ? new Date(item.limitation_date).toLocaleDateString() : '',
+                "Notice u/s": item.notice_us || item.section || '',
+                "Document reference ID": item.doc_ref_id || '',
+                "Description": item.description || '',
+                "Proceeding Open Date": item.proceeding_open_date ? new Date(item.proceeding_open_date).toLocaleDateString() : '',
+                "Type of Proceeding": item.type_of_proceeding || item.notice_type || '',
+                "Remarks": item.remarks || '',
+                "Priority Status": item.priority_status || 'Normal',
+                "Assign To": item.assigned_user_name || 'Rahim',
+                "Status": item.status || 'Open'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "EProceeding");
+
+            XLSX.writeFile(workbook, "EProceeding.xlsx");
+            showToast('Exported EProceeding.xlsx successfully!');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+    </script>
+</body>
+</html>
